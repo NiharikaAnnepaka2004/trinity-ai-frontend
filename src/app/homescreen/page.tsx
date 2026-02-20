@@ -49,13 +49,13 @@ const checkRateLimit = (key: string, maxAttempts = 3, windowMs = 60000) => {
   const record = rateLimitMap.get(key);
   if (!record || now > record.resetTime) {
     rateLimitMap.set(key, { count: 1, resetTime: now + windowMs });
-    return { allowed: true, remaining: maxAttempts - 1 };
+    return { allowed: true, remaining: maxAttempts - 1, resetInMs: 0 };
   }
   if (record.count >= maxAttempts) {
     return { allowed: false, remaining: 0, resetInMs: record.resetTime - now };
   }
   record.count++;
-  return { allowed: true, remaining: maxAttempts - record.count };
+  return { allowed: true, remaining: maxAttempts - record.count, resetInMs: 0 };
 };
 
 export default function TrinityAIHomepage() {
