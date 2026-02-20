@@ -88,8 +88,8 @@ export default function TrinityAIHomepage() {
         const srvArray = Array.isArray(srvData.data) ? srvData.data : [];
         setServices(srvArray.slice(0, 4));
 
-        // Fetch Industries
-        const indRes = await fetch(`${API_URL}/industries`);
+        // Fetch Industries with images
+        const indRes = await fetch(`${API_URL}/industries?populate=image`);
         const indData = await indRes.json();
         const indArray = Array.isArray(indData.data) ? indData.data : [];
         setIndustries(indArray);
@@ -485,7 +485,11 @@ export default function TrinityAIHomepage() {
               {solutions.map((sol, i) => {
                 const attrs = sol.attributes || sol;
                 const description = extractTextFromRichText(attrs.description);
-                const imageUrl = attrs.image?.data?.attributes?.url
+                
+                // Fixed: Handle image as array (from Strapi)
+                const imageUrl = attrs.image && Array.isArray(attrs.image) && attrs.image[0]?.url
+                  ? `http://localhost:1337${attrs.image[0].url}`
+                  : attrs.image?.data?.attributes?.url
                   ? `http://localhost:1337${attrs.image.data.attributes.url}`
                   : null;
                 
@@ -589,8 +593,10 @@ export default function TrinityAIHomepage() {
               {services.map((srv, i) => {
                 const attrs = srv.attributes || srv;
                 const description = extractTextFromRichText(attrs.description);
-                const iconUrl = attrs.icon?.data?.attributes?.url
-                  ? `http://localhost:1337${attrs.icon.data.attributes.url}`
+                
+                // Handle icon - it's an object directly from Strapi
+                const iconUrl = attrs.icon?.url
+                  ? `http://localhost:1337${attrs.icon.url}`
                   : null;
                 
                 return (
@@ -689,13 +695,19 @@ export default function TrinityAIHomepage() {
             >
               {industries.map((ind, i) => {
                 const attrs = ind.attributes || ind;
+                
+                // Handle image - it's an object directly from Strapi
+                const imageUrl = attrs.image?.url
+                  ? `http://localhost:1337${attrs.image.url}`
+                  : null;
+                
                 return (
                   <div
                     key={i}
                     style={{
                       background: 'rgba(18, 18, 26, 0.8)',
                       borderRadius: '16px',
-                      padding: '32px',
+                      overflow: 'hidden',
                       border: '1px solid rgba(255,255,255,0.05)',
                       transition: 'all 0.4s ease',
                       cursor: 'pointer',
@@ -706,12 +718,36 @@ export default function TrinityAIHomepage() {
                     onMouseEnter={() => setHoveredCard(`ind-${i}`)}
                     onMouseLeave={() => setHoveredCard(null)}
                   >
-                    <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
-                      {attrs.name}
-                    </h3>
-                    <p style={{ fontSize: '14px', color: '#9ca3af' }}>
-                      Industry-specific AI solutions
-                    </p>
+                    {imageUrl ? (
+                      <>
+                        <img
+                          src={imageUrl}
+                          alt={attrs.name}
+                          style={{
+                            width: '100%',
+                            height: '200px',
+                            objectFit: 'cover'
+                          }}
+                        />
+                        <div style={{ padding: '32px' }}>
+                          <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
+                            {attrs.name}
+                          </h3>
+                          <p style={{ fontSize: '14px', color: '#9ca3af' }}>
+                            {extractTextFromRichText(attrs.description)}
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ padding: '32px' }}>
+                        <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
+                          {attrs.name}
+                        </h3>
+                        <p style={{ fontSize: '14px', color: '#9ca3af' }}>
+                          Industry-specific AI solutions
+                        </p>
+                      </div>
+                    )}
                   </div>
                 );
               })}
