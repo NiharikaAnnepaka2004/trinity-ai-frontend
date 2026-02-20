@@ -1184,7 +1184,7 @@ export default function TrinityAIHomepage() {
                 const children = navSubItems.filter((item) => item.parentMenu === navItem.label);
 
                 return (
-                  <div key={idx} style={{ position: 'relative', display: 'inline-block', group: 'nav' }}>
+                  <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
                     {/* Main Nav Item */}
                     <div
                       style={{
