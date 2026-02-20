@@ -583,6 +583,7 @@ function extractText(richText: any): string {
 
 export default function PartnershipsPage() {
   const [partnershipData, setPartnershipData] = useState<any>(null);
+  const [branding, setBranding] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [navigationItems, setNavigationItems] = useState<any[]>([]);
@@ -597,6 +598,15 @@ export default function PartnershipsPage() {
         const data = await res.json();
         if (data.data && data.data.length > 0) {
           setPartnershipData(data.data[0]);
+        }
+
+        // Fetch Branding with logo
+        const brandRes = await fetch(`${API_URL}/branding?populate=*`);
+        const brandData = await brandRes.json();
+        if (brandData.data) {
+          const brandingData = Array.isArray(brandData.data) ? brandData.data[0] : brandData.data;
+          const attrs = brandingData?.attributes || brandingData;
+          setBranding(attrs);
         }
 
         // Fetch Navigation
@@ -692,24 +702,47 @@ export default function PartnershipsPage() {
                 cursor: 'pointer'
               }}
             >
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  background: 'linear-gradient(135deg, #00d4ff, #7c3aed)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: '18px'
-                }}
-              >
-                T
-              </div>
+              {(() => {
+                let logoUrl = null;
+                if (branding?.logo?.url) logoUrl = branding.logo.url;
+                else if (branding?.logo?.data?.attributes?.url) logoUrl = branding.logo.data.attributes.url;
+                else if (Array.isArray(branding?.logo) && branding.logo[0]?.url) logoUrl = branding.logo[0].url;
+                else if (Array.isArray(branding?.logo) && branding.logo[0]?.attributes?.url) logoUrl = branding.logo[0].attributes.url;
+
+                const fullUrl = logoUrl ? (logoUrl.startsWith('http') ? logoUrl : `http://localhost:1337${logoUrl}`) : null;
+
+                if (fullUrl) {
+                  return (
+                    <img
+                      src={fullUrl}
+                      alt={branding?.companyName || 'Logo'}
+                      style={{ height: '50px', width: 'auto', objectFit: 'contain' }}
+                    />
+                  );
+                }
+                return (
+                  <div
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      background: 'linear-gradient(135deg, #00d4ff, #7c3aed)',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '18px'
+                    }}
+                  >
+                    T
+                  </div>
+                );
+              })()}
               <div>
-                <div style={{ fontWeight: 700, fontSize: '18px', color: 'white' }}>Trinity AI</div>
+                <div style={{ fontWeight: 700, fontSize: '18px', color: 'white' }}>
+                  {branding?.companyName || 'Trinity AI'}
+                </div>
                 <div
                   style={{
                     fontSize: '10px',

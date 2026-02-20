@@ -973,6 +973,7 @@ export default function TrinityAIHomepage() {
   const [mission, setMission] = useState<any>(null);
   const [partnerships, setPartnerships] = useState<any[]>([]);
   const [footer, setFooter] = useState<any>(null);
+  const [branding, setBranding] = useState<any>(null); // NEW: Logo and branding
   const [navigationItems, setNavigationItems] = useState<any[]>([]); // Main nav
   const [navSubItems, setNavSubItems] = useState<any[]>([]); // Sub-menu items
   const [loading, setLoading] = useState(true);
@@ -1036,6 +1037,18 @@ export default function TrinityAIHomepage() {
         const navItemArray = Array.isArray(navItemData.data) ? navItemData.data : [];
         setNavSubItems(navItemArray);
         console.log('Nav sub-items:', navItemArray);
+
+        // FETCH BRANDING/SETTINGS (NEW) - Correct endpoint for your Strapi setup
+        const brandRes = await fetch(`${API_URL}/branding?populate=*`);
+        const brandData = await brandRes.json();
+        if (brandData.data) {
+          // Handle both Single Type and Collection Type responses
+          const brandingData = Array.isArray(brandData.data) ? brandData.data[0] : brandData.data;
+          const attrs = brandingData?.attributes || brandingData;
+          setBranding(attrs);
+          console.log('Branding data:', brandingData);
+          console.log('Logo:', attrs?.logo);
+        }
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -1145,24 +1158,68 @@ export default function TrinityAIHomepage() {
             }}
             onClick={() => scrollTo('hero')}
           >
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #00d4ff, #7c3aed)',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '18px'
-              }}
-            >
-              T
-            </div>
+            {/* Logo Image from Strapi */}
+            {(() => {
+              let logoUrl = null;
+              
+              // Handle different Strapi response formats
+              if (branding?.logo?.url) {
+                logoUrl = branding.logo.url;
+              } else if (branding?.logo?.data?.attributes?.url) {
+                logoUrl = branding.logo.data.attributes.url;
+              } else if (Array.isArray(branding?.logo) && branding.logo[0]?.url) {
+                logoUrl = branding.logo[0].url;
+              } else if (Array.isArray(branding?.logo) && branding.logo[0]?.attributes?.url) {
+                logoUrl = branding.logo[0].attributes.url;
+              }
+
+              if (logoUrl) {
+                const fullUrl = logoUrl.startsWith('http') 
+                  ? logoUrl 
+                  : `http://localhost:1337${logoUrl}`;
+                
+                return (
+                  <img
+                    src={fullUrl}
+                    alt={branding?.companyName || 'Logo'}
+                    style={{
+                      height: '50px',
+                      width: 'auto',
+                      objectFit: 'contain'
+                    }}
+                    onError={(e) => {
+                      console.error('Logo image failed to load:', fullUrl);
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                );
+              }
+
+              // Fallback to gradient logo
+              return (
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    background: 'linear-gradient(135deg, #00d4ff, #7c3aed)',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '18px'
+                  }}
+                >
+                  T
+                </div>
+              );
+            })()}
+            
             <div>
-              <div style={{ fontWeight: 700, fontSize: '18px', color: 'white' }}>Trinity AI</div>
+              <div style={{ fontWeight: 700, fontSize: '18px', color: 'white' }}>
+                {branding?.companyName || 'Trinity AI'}
+              </div>
               <div
                 style={{
                   fontSize: '10px',
