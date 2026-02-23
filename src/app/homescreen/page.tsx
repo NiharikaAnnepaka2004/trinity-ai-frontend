@@ -2185,7 +2185,6 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -2219,6 +2218,11 @@ const getImageUrl = (imageData: any): string | null => {
   
   // Build full URL - always prepend STRAPI_URL for relative paths
   return urlPath.startsWith('http') ? urlPath : `${STRAPI_URL}${urlPath}`;
+};
+
+// Generate placeholder image URL
+const getPlaceholderUrl = (text: string, width: number = 400, height: number = 160): string => {
+  return `https://via.placeholder.com/${width}x${height}/1a1a2e/00d4ff?text=${encodeURIComponent(text)}`;
 };
 
 // Helper to build Navigation with dropdowns from Strapi data
@@ -2962,12 +2966,21 @@ export default function TrinityAIHomepage() {
                           marginBottom: '20px'
                         }}
                         onError={(e) => {
-                          console.error('Failed to load solution image. URL:', imageUrl);
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).src = getPlaceholderUrl(attrs.title);
                         }}
                       />
                     ) : (
-                      <div style={{ fontSize: '40px', marginBottom: '20px' }}>✨</div>
+                      <img
+                        src={getPlaceholderUrl(attrs.title)}
+                        alt={attrs.title}
+                        style={{
+                          width: '100%',
+                          height: '160px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          marginBottom: '20px'
+                        }}
+                      />
                     )}
                     <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.title}
@@ -3064,12 +3077,21 @@ export default function TrinityAIHomepage() {
                           marginBottom: '20px'
                         }}
                         onError={(e) => {
-                          console.error('Failed to load icon:', iconUrl);
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).src = getPlaceholderUrl(attrs.title);
                         }}
                       />
                     ) : (
-                      <div style={{ fontSize: '40px', marginBottom: '20px' }}>🧭</div>
+                      <img
+                        src={getPlaceholderUrl(attrs.title)}
+                        alt={attrs.title}
+                        style={{
+                          width: '100%',
+                          height: '160px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          marginBottom: '20px'
+                        }}
+                      />
                     )}
                     <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.title}
@@ -3165,8 +3187,7 @@ export default function TrinityAIHomepage() {
                             objectFit: 'cover'
                           }}
                           onError={(e) => {
-                            console.error('Failed to load industry image:', imageUrl);
-                            (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            (e.currentTarget as HTMLImageElement).src = getPlaceholderUrl(attrs.name, 400, 200);
                           }}
                         />
                         <div style={{ padding: '32px' }}>
@@ -3179,14 +3200,25 @@ export default function TrinityAIHomepage() {
                         </div>
                       </>
                     ) : (
-                      <div style={{ padding: '32px' }}>
-                        <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
-                          {attrs.name}
-                        </h3>
-                        <p style={{ fontSize: '14px', color: '#9ca3af' }}>
-                          {extractTextFromRichText(attrs.description)}
-                        </p>
-                      </div>
+                      <>
+                        <img
+                          src={getPlaceholderUrl(attrs.name, 400, 200)}
+                          alt={attrs.name}
+                          style={{
+                            width: '100%',
+                            height: '200px',
+                            objectFit: 'cover'
+                          }}
+                        />
+                        <div style={{ padding: '32px' }}>
+                          <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
+                            {attrs.name}
+                          </h3>
+                          <p style={{ fontSize: '14px', color: '#9ca3af' }}>
+                            {extractTextFromRichText(attrs.description)}
+                          </p>
+                        </div>
+                      </>
                     )}
                   </div>
                 );
@@ -3279,12 +3311,20 @@ export default function TrinityAIHomepage() {
                           marginBottom: '20px'
                         }}
                         onError={(e) => {
-                          console.error('Failed to load partner logo:', logoUrl);
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).src = getPlaceholderUrl(attrs.name, 400, 120);
                         }}
                       />
                     ) : (
-                      <div style={{ fontSize: '40px', marginBottom: '20px' }}>🤝</div>
+                      <img
+                        src={getPlaceholderUrl(attrs.name, 400, 120)}
+                        alt={attrs.name}
+                        style={{
+                          width: '100%',
+                          height: '120px',
+                          objectFit: 'contain',
+                          marginBottom: '20px'
+                        }}
+                      />
                     )}
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.name}
