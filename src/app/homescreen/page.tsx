@@ -2200,15 +2200,17 @@ const getImageUrl = (imageData: any): string | null => {
   
   let urlPath = null;
   
-  // Handle array format
+  // Handle array format (for multi-file relations)
   if (Array.isArray(imageData)) {
-    if (imageData[0]?.url) urlPath = imageData[0].url;
-    else if (imageData[0]?.attributes?.url) urlPath = imageData[0].attributes.url;
+    if (imageData.length === 0) return null;
+    const img = imageData[0];
+    if (img?.attributes?.url) urlPath = img.attributes.url;
+    else if (img?.url) urlPath = img.url;
   }
-  // Handle object format
+  // Handle direct object format
   else if (typeof imageData === 'object') {
-    if (imageData.url) urlPath = imageData.url;
-    else if (imageData.attributes?.url) urlPath = imageData.attributes.url;
+    if (imageData.attributes?.url) urlPath = imageData.attributes.url;
+    else if (imageData.url) urlPath = imageData.url;
   }
   
   if (!urlPath) return null;
@@ -2317,20 +2319,20 @@ export default function TrinityAIHomepage() {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // Fetch Solutions with images
-        const solRes = await fetch(`${API_URL}/solutions?populate=image`);
+        // Fetch Solutions with all populated fields
+        const solRes = await fetch(`${API_URL}/solutions?populate=*`);
         const solData = await solRes.json();
         const solArray = Array.isArray(solData.data) ? solData.data : [];
         setSolutions(solArray.slice(0, 4));
 
-        // Fetch Services with icons
-        const srvRes = await fetch(`${API_URL}/services?populate=icon`);
+        // Fetch Services with all populated fields
+        const srvRes = await fetch(`${API_URL}/services?populate=*`);
         const srvData = await srvRes.json();
         const srvArray = Array.isArray(srvData.data) ? srvData.data : [];
         setServices(srvArray.slice(0, 4));
 
-        // Fetch Industries with images
-        const indRes = await fetch(`${API_URL}/industries?populate=image`);
+        // Fetch Industries with all populated fields
+        const indRes = await fetch(`${API_URL}/industries?populate=*`);
         const indData = await indRes.json();
         const indArray = Array.isArray(indData.data) ? indData.data : [];
         setIndustries(indArray);
@@ -2343,14 +2345,14 @@ export default function TrinityAIHomepage() {
           setMission(misArray[0]);
         }
 
-        // Fetch Partnerships with logos
-        const partRes = await fetch(`${API_URL}/partnerships?populate=logo`);
+        // Fetch Partnerships with all populated fields
+        const partRes = await fetch(`${API_URL}/partnerships?populate=*`);
         const partData = await partRes.json();
         const partArray = Array.isArray(partData.data) ? partData.data : [];
         setPartnerships(partArray);
 
         // Fetch Footer data
-        const footRes = await fetch(`${API_URL}/footers?populate=links`);
+        const footRes = await fetch(`${API_URL}/footers?populate=*`);
         const footData = await footRes.json();
         const footArray = Array.isArray(footData.data) ? footData.data : [];
         if (footArray.length > 0) {
