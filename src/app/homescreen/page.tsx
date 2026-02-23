@@ -2931,8 +2931,6 @@ export default function TrinityAIHomepage() {
                 
                 const imageUrl = attrs.image && Array.isArray(attrs.image) && attrs.image[0]?.url
                   ? `${STRAPI_URL}${attrs.image[0].url}`
-                  : attrs.image?.data?.attributes?.url
-                  ? `${STRAPI_URL}${attrs.image.data.attributes.url}`
                   : null;
                 
                 return (
@@ -3036,7 +3034,9 @@ export default function TrinityAIHomepage() {
                 const attrs = srv.attributes || srv;
                 const description = extractTextFromRichText(attrs.description);
                 
-                const iconUrl = attrs.icon?.url
+                const iconUrl = attrs.icon && Array.isArray(attrs.icon) && attrs.icon[0]?.url
+                  ? `${STRAPI_URL}${attrs.icon[0].url}`
+                  : attrs.icon?.url
                   ? `${STRAPI_URL}${attrs.icon.url}`
                   : null;
                 
@@ -3137,7 +3137,9 @@ export default function TrinityAIHomepage() {
               {industries.map((ind, i) => {
                 const attrs = ind.attributes || ind;
                 
-                const imageUrl = attrs.image?.url
+                const imageUrl = attrs.image && Array.isArray(attrs.image) && attrs.image[0]?.url
+                  ? `${STRAPI_URL}${attrs.image[0].url}`
+                  : attrs.image?.url
                   ? `${STRAPI_URL}${attrs.image.url}`
                   : null;
                 
@@ -3249,7 +3251,9 @@ export default function TrinityAIHomepage() {
               {partnerships.map((partner, i) => {
                 const attrs = partner.attributes || partner;
                 
-                const logoUrl = attrs.logo?.url
+                const logoUrl = attrs.logo && Array.isArray(attrs.logo) && attrs.logo[0]?.url
+                  ? `${STRAPI_URL}${attrs.logo[0].url}`
+                  : attrs.logo?.url
                   ? `${STRAPI_URL}${attrs.logo.url}`
                   : null;
                 
