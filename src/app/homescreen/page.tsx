@@ -2220,9 +2220,20 @@ const getImageUrl = (imageData: any): string | null => {
   return urlPath.startsWith('http') ? urlPath : `${STRAPI_URL}${urlPath}`;
 };
 
-// Generate placeholder image URL
+// Generate placeholder image as gradient background
 const getPlaceholderUrl = (text: string, width: number = 400, height: number = 160): string => {
-  return `https://via.placeholder.com/${width}x${height}/1a1a2e/00d4ff?text=${encodeURIComponent(text)}`;
+  // Return a data URL with a gradient instead of external service
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+    <defs>
+      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    <rect width="${width}" height="${height}" fill="url(#grad)"/>
+    <text x="50%" y="50%" font-family="Arial" font-size="16" fill="#00d4ff" text-anchor="middle" dominant-baseline="middle" word-wrap="break-word">${text.substring(0, 20)}</text>
+  </svg>`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 };
 
 // Helper to build Navigation with dropdowns from Strapi data
