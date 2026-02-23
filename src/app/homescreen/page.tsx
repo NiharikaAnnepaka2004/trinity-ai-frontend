@@ -2186,7 +2186,6 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -2194,6 +2193,33 @@ import Link from 'next/link';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://trinity-ai-backend.onrender.com';
+
+// Helper function to build complete image URL - Fixed for actual Strapi response
+const getImageUrl = (imageData: any): string | null => {
+  if (!imageData) return null;
+  
+  let urlPath = null;
+  
+  // Handle array format (for multi-file relations)
+  if (Array.isArray(imageData)) {
+    if (imageData.length === 0) return null;
+    const img = imageData[0];
+    // Strapi returns url directly in array items
+    urlPath = img?.url;
+  }
+  // Handle direct object format
+  else if (typeof imageData === 'object') {
+    // Strapi returns url directly
+    urlPath = imageData.url;
+  }
+  
+  if (!urlPath) {
+    return null;
+  }
+  
+  // Build full URL - always prepend STRAPI_URL for relative paths
+  return urlPath.startsWith('http') ? urlPath : `${STRAPI_URL}${urlPath}`;
+};
 
 // Helper to build Navigation with dropdowns from Strapi data
 const buildNavWithDropdowns = (mainNav: any[], allNavItems: any[]) => {
@@ -2286,34 +2312,34 @@ export default function TrinityAIHomepage() {
   const [mission, setMission] = useState<any>(null);
   const [partnerships, setPartnerships] = useState<any[]>([]);
   const [footer, setFooter] = useState<any>(null);
-  const [branding, setBranding] = useState<any>(null); // NEW: Logo and branding
-  const [navigationItems, setNavigationItems] = useState<any[]>([]); // Main nav
-  const [navSubItems, setNavSubItems] = useState<any[]>([]); // Sub-menu items
+  const [branding, setBranding] = useState<any>(null);
+  const [navigationItems, setNavigationItems] = useState<any[]>([]);
+  const [navSubItems, setNavSubItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch all data from Strapi
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // Fetch Solutions with images
-        const solRes = await fetch(`${API_URL}/solutions?populate=image`);
+        // Fetch Solutions with all populated fields
+        const solRes = await fetch(`${API_URL}/solutions?populate=*`);
         const solData = await solRes.json();
         const solArray = Array.isArray(solData.data) ? solData.data : [];
         setSolutions(solArray.slice(0, 4));
 
-        // Fetch Services with icons
-        const srvRes = await fetch(`${API_URL}/services?populate=icon`);
+        // Fetch Services with all populated fields
+        const srvRes = await fetch(`${API_URL}/services?populate=*`);
         const srvData = await srvRes.json();
         const srvArray = Array.isArray(srvData.data) ? srvData.data : [];
         setServices(srvArray.slice(0, 4));
 
-        // Fetch Industries with images
-        const indRes = await fetch(`${API_URL}/industries?populate=image`);
+        // Fetch Industries with all populated fields
+        const indRes = await fetch(`${API_URL}/industries?populate=*`);
         const indData = await indRes.json();
         const indArray = Array.isArray(indData.data) ? indData.data : [];
         setIndustries(indArray);
 
-        // Fetch Mission (assuming single entry) - uses 'content' field, not 'description'
+        // Fetch Mission
         const misRes = await fetch(`${API_URL}/missions`);
         const misData = await misRes.json();
         const misArray = Array.isArray(misData.data) ? misData.data : [];
@@ -2321,46 +2347,39 @@ export default function TrinityAIHomepage() {
           setMission(misArray[0]);
         }
 
-        // Fetch Partnerships with logos
-        const partRes = await fetch(`${API_URL}/partnerships?populate=logo`);
+        // Fetch Partnerships with all populated fields
+        const partRes = await fetch(`${API_URL}/partnerships?populate=*`);
         const partData = await partRes.json();
         const partArray = Array.isArray(partData.data) ? partData.data : [];
         setPartnerships(partArray);
 
-        // Fetch Footer data with links populated - URL is /footers (plural)
-        const footRes = await fetch(`${API_URL}/footers?populate=links`);
+        // Fetch Footer data
+        const footRes = await fetch(`${API_URL}/footers?populate=*`);
         const footData = await footRes.json();
         const footArray = Array.isArray(footData.data) ? footData.data : [];
         if (footArray.length > 0) {
-          console.log('Footer data:', footArray[0]);
-          console.log('Footer links:', footArray[0].links);
           setFooter(footArray[0]);
         }
 
-        // Fetch Main Navigation - URL is /navigations (plural)
+        // Fetch Main Navigation
         const mainNavRes = await fetch(`${API_URL}/navigations`);
         const mainNavData = await mainNavRes.json();
         const mainNavArray = Array.isArray(mainNavData.data) ? mainNavData.data : [];
         setNavigationItems(mainNavArray);
-        console.log('Main nav:', mainNavArray);
 
         // Fetch Navigation Items (children/sub-items)
         const navItemRes = await fetch(`${API_URL}/navigation-items`);
         const navItemData = await navItemRes.json();
         const navItemArray = Array.isArray(navItemData.data) ? navItemData.data : [];
         setNavSubItems(navItemArray);
-        console.log('Nav sub-items:', navItemArray);
 
-        // FETCH BRANDING/SETTINGS (NEW) - Correct endpoint for your Strapi setup
+        // FETCH BRANDING/SETTINGS
         const brandRes = await fetch(`${API_URL}/branding?populate=*`);
         const brandData = await brandRes.json();
         if (brandData.data) {
-          // Handle both Single Type and Collection Type responses
           const brandingData = Array.isArray(brandData.data) ? brandData.data[0] : brandData.data;
           const attrs = brandingData?.attributes || brandingData;
           setBranding(attrs);
-          console.log('Branding data:', brandingData);
-          console.log('Logo:', attrs?.logo);
         }
 
       } catch (error) {
@@ -2424,8 +2443,6 @@ export default function TrinityAIHomepage() {
     { value: '90%+', label: 'Accuracy', sublabel: 'with ML Models' }
   ];
 
-
-
   return (
     <div
       style={{
@@ -2471,29 +2488,13 @@ export default function TrinityAIHomepage() {
             }}
             onClick={() => scrollTo('hero')}
           >
-            {/* Logo Image from Strapi */}
             {(() => {
-              let logoUrl = null;
-              
-              // Handle different Strapi response formats
-              if (branding?.logo?.url) {
-                logoUrl = branding.logo.url;
-              } else if (branding?.logo?.data?.attributes?.url) {
-                logoUrl = branding.logo.data.attributes.url;
-              } else if (Array.isArray(branding?.logo) && branding.logo[0]?.url) {
-                logoUrl = branding.logo[0].url;
-              } else if (Array.isArray(branding?.logo) && branding.logo[0]?.attributes?.url) {
-                logoUrl = branding.logo[0].attributes.url;
-              }
+              const logoUrl = getImageUrl(branding?.logo);
 
               if (logoUrl) {
-                const fullUrl = logoUrl.startsWith('http') 
-                  ? logoUrl 
-                  : `${STRAPI_URL}${logoUrl}`;
-                
                 return (
                   <img
-                    src={fullUrl}
+                    src={logoUrl}
                     alt={branding?.companyName || 'Logo'}
                     style={{
                       height: '50px',
@@ -2501,7 +2502,7 @@ export default function TrinityAIHomepage() {
                       objectFit: 'contain'
                     }}
                     onError={(e) => {
-                      console.error('Logo image failed to load:', fullUrl);
+                      console.error('Logo image failed to load:', logoUrl);
                       (e.currentTarget as HTMLImageElement).style.display = 'none';
                     }}
                   />
@@ -2550,7 +2551,6 @@ export default function TrinityAIHomepage() {
           <div style={{ display: 'flex', gap: '32px', position: 'relative' }}>
             {navigationItems.length > 0 &&
               navigationItems.map((navItem, idx) => {
-                // Get children for this nav item from navSubItems
                 const children = navSubItems.filter((item) => item.parentMenu === navItem.label);
 
                 return (
@@ -2570,7 +2570,6 @@ export default function TrinityAIHomepage() {
                       }}
                       onMouseEnter={e => {
                         (e.currentTarget as HTMLElement).style.color = 'white';
-                        // Show dropdown on parent hover
                         const dropdown = (e.currentTarget as HTMLElement).nextElementSibling as HTMLElement;
                         if (dropdown) {
                           dropdown.style.display = 'block';
@@ -2841,7 +2840,7 @@ export default function TrinityAIHomepage() {
         </div>
       </section>
 
-      {/* Mission Section - Fetched from Strapi */}
+      {/* Mission Section */}
       {mission && (
         <section
           id="mission"
@@ -2928,10 +2927,7 @@ export default function TrinityAIHomepage() {
               {solutions.map((sol, i) => {
                 const attrs = sol.attributes || sol;
                 const description = extractTextFromRichText(attrs.description);
-                
-                const imageUrl = attrs.image && Array.isArray(attrs.image) && attrs.image[0]?.url
-                  ? `${STRAPI_URL}${attrs.image[0].url}`
-                  : null;
+                const imageUrl = getImageUrl(attrs.image);
                 
                 return (
                   <div
@@ -2964,6 +2960,10 @@ export default function TrinityAIHomepage() {
                           objectFit: 'cover',
                           borderRadius: '8px',
                           marginBottom: '20px'
+                        }}
+                        onError={(e) => {
+                          console.error('Failed to load solution image. URL:', imageUrl);
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
                     ) : (
@@ -3033,12 +3033,7 @@ export default function TrinityAIHomepage() {
               {services.map((srv, i) => {
                 const attrs = srv.attributes || srv;
                 const description = extractTextFromRichText(attrs.description);
-                
-                const iconUrl = attrs.icon && Array.isArray(attrs.icon) && attrs.icon[0]?.url
-                  ? `${STRAPI_URL}${attrs.icon[0].url}`
-                  : attrs.icon?.url
-                  ? `${STRAPI_URL}${attrs.icon.url}`
-                  : null;
+                const iconUrl = getImageUrl(attrs.icon);
                 
                 return (
                   <div
@@ -3067,6 +3062,10 @@ export default function TrinityAIHomepage() {
                           objectFit: 'cover',
                           borderRadius: '8px',
                           marginBottom: '20px'
+                        }}
+                        onError={(e) => {
+                          console.error('Failed to load icon:', iconUrl);
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
                     ) : (
@@ -3136,12 +3135,7 @@ export default function TrinityAIHomepage() {
             >
               {industries.map((ind, i) => {
                 const attrs = ind.attributes || ind;
-                
-                const imageUrl = attrs.image && Array.isArray(attrs.image) && attrs.image[0]?.url
-                  ? `${STRAPI_URL}${attrs.image[0].url}`
-                  : attrs.image?.url
-                  ? `${STRAPI_URL}${attrs.image.url}`
-                  : null;
+                const imageUrl = getImageUrl(attrs.image);
                 
                 return (
                   <div
@@ -3169,6 +3163,10 @@ export default function TrinityAIHomepage() {
                             width: '100%',
                             height: '200px',
                             objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            console.error('Failed to load industry image:', imageUrl);
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
                           }}
                         />
                         <div style={{ padding: '32px' }}>
@@ -3198,7 +3196,7 @@ export default function TrinityAIHomepage() {
         </div>
       </section>
 
-      {/* Partnerships Section - Fetched from Strapi */}
+      {/* Partnerships Section */}
       <section
         id="partnerships"
         style={{
@@ -3250,12 +3248,7 @@ export default function TrinityAIHomepage() {
             >
               {partnerships.map((partner, i) => {
                 const attrs = partner.attributes || partner;
-                
-                const logoUrl = attrs.logo && Array.isArray(attrs.logo) && attrs.logo[0]?.url
-                  ? `${STRAPI_URL}${attrs.logo[0].url}`
-                  : attrs.logo?.url
-                  ? `${STRAPI_URL}${attrs.logo.url}`
-                  : null;
+                const logoUrl = getImageUrl(attrs.logos || attrs.logo);
                 
                 return (
                   <div
@@ -3284,6 +3277,10 @@ export default function TrinityAIHomepage() {
                           height: '120px',
                           objectFit: 'contain',
                           marginBottom: '20px'
+                        }}
+                        onError={(e) => {
+                          console.error('Failed to load partner logo:', logoUrl);
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
                     ) : (
@@ -3400,7 +3397,7 @@ export default function TrinityAIHomepage() {
         </div>
       </section>
 
-      {/* Footer - Data from Strapi */}
+      {/* Footer */}
       <footer
         style={{
           background: '#050508',
@@ -3417,7 +3414,6 @@ export default function TrinityAIHomepage() {
               marginBottom: '48px'
             }}
           >
-            {/* Company Info from Strapi Footer */}
             {footer && (
               <>
                 <div>
@@ -3431,48 +3427,37 @@ export default function TrinityAIHomepage() {
                   )}
                 </div>
 
-                {/* Quick Links from Strapi Footer */}
                 {footer?.links && Array.isArray(footer.links) && footer.links.length > 0 ? (
                   <div>
                     <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '16px' }}>
                       Quick Links
                     </h3>
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                      {footer.links.map((link: any, idx: number) => {
-                        console.log('Rendering link:', link);
-                        return (
-                          <li key={`link-${idx}`} style={{ marginBottom: '12px' }}>
-                            <a
-                              href={link.url || '#'}
-                              style={{
-                                fontSize: '14px',
-                                color: '#9ca3af',
-                                textDecoration: 'none',
-                                transition: 'color 0.3s',
-                                display: 'block'
-                              }}
-                              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#00d4ff')}
-                              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = '#9ca3af')}
-                            >
-                              {link.label}
-                            </a>
-                          </li>
-                        );
-                      })}
+                      {footer.links.map((link: any, idx: number) => (
+                        <li key={`link-${idx}`} style={{ marginBottom: '12px' }}>
+                          <a
+                            href={link.url || '#'}
+                            style={{
+                              fontSize: '14px',
+                              color: '#9ca3af',
+                              textDecoration: 'none',
+                              transition: 'color 0.3s',
+                              display: 'block'
+                            }}
+                            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#00d4ff')}
+                            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = '#9ca3af')}
+                          >
+                            {link.label}
+                          </a>
+                        </li>
+                      ))}
                     </ul>
                   </div>
-                ) : (
-                  footer && (
-                    <div style={{ color: '#6b7280', fontSize: '12px' }}>
-                      No quick links available
-                    </div>
-                  )
-                )}
+                ) : null}
               </>
             )}
           </div>
 
-          {/* Copyright from Strapi */}
           <div style={{ textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px' }}>
             <p style={{ fontSize: '14px', color: '#6b7280' }}>
               {footer?.copyright || `© ${new Date().getFullYear()} The Trinity AI Software Inc. All rights reserved.`}
