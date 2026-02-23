@@ -2184,7 +2184,6 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -2220,9 +2219,9 @@ const getImageUrl = (imageData: any): string | null => {
   return urlPath.startsWith('http') ? urlPath : `${STRAPI_URL}${urlPath}`;
 };
 
-// Generate placeholder image URL
-const getPlaceholderUrl = (text: string, width: number = 400, height: number = 160): string => {
-  return `https://via.placeholder.com/${width}x${height}/1a1a2e/00d4ff?text=${encodeURIComponent(text)}`;
+// Simple fallback - don't generate placeholder, just use CSS gradient
+const getPlaceholderUrl = (): string | null => {
+  return null; // Return null to use CSS gradient fallback
 };
 
 // Helper to build Navigation with dropdowns from Strapi data
@@ -2966,21 +2965,22 @@ export default function TrinityAIHomepage() {
                           marginBottom: '20px'
                         }}
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = getPlaceholderUrl(attrs.title);
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
-                    ) : (
-                      <img
-                        src={getPlaceholderUrl(attrs.title)}
-                        alt={attrs.title}
-                        style={{
-                          width: '100%',
-                          height: '160px',
-                          objectFit: 'cover',
-                          borderRadius: '8px',
-                          marginBottom: '20px'
-                        }}
-                      />
+                    ) : null}
+                    {!imageUrl && (
+                      <div style={{
+                        width: '100%',
+                        height: '160px',
+                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                        borderRadius: '8px',
+                        marginBottom: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '40px'
+                      }}>✨</div>
                     )}
                     <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.title}
@@ -3077,21 +3077,22 @@ export default function TrinityAIHomepage() {
                           marginBottom: '20px'
                         }}
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = getPlaceholderUrl(attrs.title);
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
-                    ) : (
-                      <img
-                        src={getPlaceholderUrl(attrs.title)}
-                        alt={attrs.title}
-                        style={{
-                          width: '100%',
-                          height: '160px',
-                          objectFit: 'cover',
-                          borderRadius: '8px',
-                          marginBottom: '20px'
-                        }}
-                      />
+                    ) : null}
+                    {!iconUrl && (
+                      <div style={{
+                        width: '100%',
+                        height: '160px',
+                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                        borderRadius: '8px',
+                        marginBottom: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '40px'
+                      }}>🧭</div>
                     )}
                     <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.title}
@@ -3187,7 +3188,7 @@ export default function TrinityAIHomepage() {
                             objectFit: 'cover'
                           }}
                           onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = getPlaceholderUrl(attrs.name, 400, 200);
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
                           }}
                         />
                         <div style={{ padding: '32px' }}>
@@ -3201,15 +3202,15 @@ export default function TrinityAIHomepage() {
                       </>
                     ) : (
                       <>
-                        <img
-                          src={getPlaceholderUrl(attrs.name, 400, 200)}
-                          alt={attrs.name}
-                          style={{
-                            width: '100%',
-                            height: '200px',
-                            objectFit: 'cover'
-                          }}
-                        />
+                        <div style={{
+                          width: '100%',
+                          height: '200px',
+                          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '40px'
+                        }}>🏢</div>
                         <div style={{ padding: '32px' }}>
                           <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                             {attrs.name}
@@ -3311,20 +3312,22 @@ export default function TrinityAIHomepage() {
                           marginBottom: '20px'
                         }}
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = getPlaceholderUrl(attrs.name, 400, 120);
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
-                    ) : (
-                      <img
-                        src={getPlaceholderUrl(attrs.name, 400, 120)}
-                        alt={attrs.name}
-                        style={{
-                          width: '100%',
-                          height: '120px',
-                          objectFit: 'contain',
-                          marginBottom: '20px'
-                        }}
-                      />
+                    ) : null}
+                    {!logoUrl && (
+                      <div style={{
+                        width: '100%',
+                        height: '120px',
+                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                        borderRadius: '8px',
+                        marginBottom: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '40px'
+                      }}>🤝</div>
                     )}
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.name}
