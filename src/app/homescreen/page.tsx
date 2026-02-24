@@ -2178,7 +2178,6 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -2930,7 +2929,7 @@ export default function TrinityAIHomepage() {
                         alt={attrs.title}
                         style={{
                           width: '100%',
-                          height: '160px',
+                          height: '120px',
                           objectFit: 'cover',
                           borderRadius: '8px',
                           marginBottom: '20px'
@@ -3026,7 +3025,7 @@ export default function TrinityAIHomepage() {
                         alt={attrs.title}
                         style={{
                           width: '100%',
-                          height: '160px',
+                          height: '120px',
                           objectFit: 'cover',
                           borderRadius: '8px',
                           marginBottom: '20px'
@@ -3123,7 +3122,7 @@ export default function TrinityAIHomepage() {
                           alt={attrs.name}
                           style={{
                             width: '100%',
-                            height: '200px',
+                            height: '150px',
                             objectFit: 'cover'
                           }}
                         />
@@ -3232,7 +3231,7 @@ export default function TrinityAIHomepage() {
                         alt={attrs.name}
                         style={{
                           width: '100%',
-                          height: '120px',
+                          height: '80px',
                           objectFit: 'contain',
                           marginBottom: '20px'
                         }}
