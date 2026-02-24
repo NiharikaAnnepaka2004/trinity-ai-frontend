@@ -2183,7 +2183,6 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -2953,7 +2952,7 @@ export default function TrinityAIHomepage() {
                     onMouseEnter={() => setHoveredCard(`sol-${i}`)}
                     onMouseLeave={() => setHoveredCard(null)}
                   >
-                    {imageUrl ? (
+                    {imageUrl && (
                       <img
                         src={imageUrl}
                         alt={attrs.title}
@@ -2964,23 +2963,7 @@ export default function TrinityAIHomepage() {
                           borderRadius: '8px',
                           marginBottom: '20px'
                         }}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        }}
                       />
-                    ) : null}
-                    {!imageUrl && (
-                      <div style={{
-                        width: '100%',
-                        height: '160px',
-                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                        borderRadius: '8px',
-                        marginBottom: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '40px'
-                      }}>✨</div>
                     )}
                     <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.title}
@@ -3065,7 +3048,7 @@ export default function TrinityAIHomepage() {
                     onMouseEnter={() => setHoveredCard(`srv-${i}`)}
                     onMouseLeave={() => setHoveredCard(null)}
                   >
-                    {iconUrl ? (
+                    {iconUrl && (
                       <img
                         src={iconUrl}
                         alt={attrs.title}
@@ -3076,23 +3059,7 @@ export default function TrinityAIHomepage() {
                           borderRadius: '8px',
                           marginBottom: '20px'
                         }}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        }}
                       />
-                    ) : null}
-                    {!iconUrl && (
-                      <div style={{
-                        width: '100%',
-                        height: '160px',
-                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                        borderRadius: '8px',
-                        marginBottom: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '40px'
-                      }}>🧭</div>
                     )}
                     <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.title}
@@ -3187,9 +3154,6 @@ export default function TrinityAIHomepage() {
                             height: '200px',
                             objectFit: 'cover'
                           }}
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).style.display = 'none';
-                          }}
                         />
                         <div style={{ padding: '32px' }}>
                           <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
@@ -3201,25 +3165,14 @@ export default function TrinityAIHomepage() {
                         </div>
                       </>
                     ) : (
-                      <>
-                        <div style={{
-                          width: '100%',
-                          height: '200px',
-                          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '40px'
-                        }}>🏢</div>
-                        <div style={{ padding: '32px' }}>
-                          <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
-                            {attrs.name}
-                          </h3>
-                          <p style={{ fontSize: '14px', color: '#9ca3af' }}>
-                            {extractTextFromRichText(attrs.description)}
-                          </p>
-                        </div>
-                      </>
+                      <div style={{ padding: '32px' }}>
+                        <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
+                          {attrs.name}
+                        </h3>
+                        <p style={{ fontSize: '14px', color: '#9ca3af' }}>
+                          {extractTextFromRichText(attrs.description)}
+                        </p>
+                      </div>
                     )}
                   </div>
                 );
@@ -3301,7 +3254,7 @@ export default function TrinityAIHomepage() {
                     onMouseEnter={() => setHoveredCard(`partner-${i}`)}
                     onMouseLeave={() => setHoveredCard(null)}
                   >
-                    {logoUrl ? (
+                    {logoUrl && (
                       <img
                         src={logoUrl}
                         alt={attrs.name}
@@ -3311,23 +3264,7 @@ export default function TrinityAIHomepage() {
                           objectFit: 'contain',
                           marginBottom: '20px'
                         }}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        }}
                       />
-                    ) : null}
-                    {!logoUrl && (
-                      <div style={{
-                        width: '100%',
-                        height: '120px',
-                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                        borderRadius: '8px',
-                        marginBottom: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '40px'
-                      }}>🤝</div>
                     )}
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>
                       {attrs.name}
