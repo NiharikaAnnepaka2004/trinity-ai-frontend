@@ -2526,7 +2526,9 @@ export default function TrinityAIHomepage() {
                   key={idx} 
                   style={{ position: 'relative', display: 'inline-block' }}
                   onMouseLeave={() => {
-                    setOpenDropdown(null);
+                    setTimeout(() => {
+                      setOpenDropdown(null);
+                    }, 100);
                   }}
                 >
                   {/* Main Nav Item */}
@@ -2573,7 +2575,14 @@ export default function TrinityAIHomepage() {
                         backdropFilter: 'blur(10px)',
                         boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
                         zIndex: 100,
-                        padding: '4px 0'
+                        padding: '4px 0',
+                        pointerEvents: 'auto'
+                      }}
+                      onMouseEnter={() => {
+                        setOpenDropdown(navLabel);
+                      }}
+                      onMouseLeave={() => {
+                        setOpenDropdown(null);
                       }}
                     >
                       {children.map((child, cIdx) => {
