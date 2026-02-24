@@ -2180,7 +2180,6 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -2523,7 +2522,13 @@ export default function TrinityAIHomepage() {
               const isDropdown = children.length > 0;
 
               return (
-                <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
+                <div 
+                  key={idx} 
+                  style={{ position: 'relative', display: 'inline-block' }}
+                  onMouseLeave={() => {
+                    setOpenDropdown(null);
+                  }}
+                >
                   {/* Main Nav Item */}
                   <div
                     style={{
@@ -2539,9 +2544,6 @@ export default function TrinityAIHomepage() {
                     }}
                     onMouseEnter={() => {
                       if (isDropdown) setOpenDropdown(navLabel);
-                    }}
-                    onMouseLeave={() => {
-                      setOpenDropdown(null);
                     }}
                   >
                     <span
@@ -2572,12 +2574,6 @@ export default function TrinityAIHomepage() {
                         boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
                         zIndex: 100,
                         padding: '4px 0'
-                      }}
-                      onMouseEnter={() => {
-                        setOpenDropdown(navLabel);
-                      }}
-                      onMouseLeave={() => {
-                        setOpenDropdown(null);
                       }}
                     >
                       {children.map((child, cIdx) => {
@@ -3087,7 +3083,7 @@ export default function TrinityAIHomepage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '24px'
               }}
             >
