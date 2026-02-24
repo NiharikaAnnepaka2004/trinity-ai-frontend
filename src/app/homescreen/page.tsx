@@ -2181,7 +2181,6 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -2284,7 +2283,6 @@ export default function TrinityAIHomepage() {
   const [partnerships, setPartnerships] = useState<any[]>([]);
   const [footer, setFooter] = useState<any>(null);
   const [branding, setBranding] = useState<any>(null);
-  const [navigationItems, setNavigationItems] = useState<any[]>([]);
   const [navSubItems, setNavSubItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -2333,13 +2331,7 @@ export default function TrinityAIHomepage() {
           setFooter(footArray[0]);
         }
 
-        // Fetch Main Navigation
-        const mainNavRes = await fetch(`${API_URL}/navigations`);
-        const mainNavData = await mainNavRes.json();
-        const mainNavArray = Array.isArray(mainNavData.data) ? mainNavData.data : [];
-        setNavigationItems(mainNavArray);
-
-        // Fetch Navigation Items (children/sub-items)
+        // Fetch Navigation Items (children/sub-items) - matches parent menu names
         const navItemRes = await fetch(`${API_URL}/navigation-items`);
         const navItemData = await navItemRes.json();
         const navItemArray = Array.isArray(navItemData.data) ? navItemData.data : [];
@@ -2521,109 +2513,111 @@ export default function TrinityAIHomepage() {
 
           {/* Navigation Links with Dropdowns */}
           <div style={{ display: 'flex', gap: '32px', position: 'relative' }}>
-            {navigationItems.length > 0 &&
-              navigationItems.map((navItem, idx) => {
-                const children = navSubItems.filter((item) => {
-                  const attrs = item.attributes || item;
-                  return attrs.parentMenu === navItem.label;
-                });
+            {['Home', 'AI Solutions', 'AI Services', 'The Trinity AI Platform'].map((navLabel, idx) => {
+              // Get children for this nav item from navSubItems
+              const children = navSubItems.filter((item) => {
+                const attrs = item.attributes || item;
+                return attrs.parentMenu === navLabel;
+              });
+              
+              const isDropdown = children.length > 0;
 
-                return (
-                  <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
-                    {/* Main Nav Item */}
+              return (
+                <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
+                  {/* Main Nav Item */}
+                  <div
+                    style={{
+                      color: '#d1d5db',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      transition: 'color 0.3s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 0'
+                    }}
+                    onMouseEnter={() => {
+                      if (isDropdown) setOpenDropdown(navLabel);
+                    }}
+                    onMouseLeave={() => {
+                      setOpenDropdown(null);
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: openDropdown === navLabel ? 'white' : '#d1d5db'
+                      }}
+                    >
+                      {navLabel}
+                    </span>
+                    {isDropdown && (
+                      <span style={{ fontSize: '10px' }}>▼</span>
+                    )}
+                  </div>
+
+                  {/* Dropdown Menu - Only show if has children */}
+                  {isDropdown && openDropdown === navLabel && (
                     <div
                       style={{
-                        color: '#d1d5db',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        cursor: 'pointer',
-                        transition: 'color 0.3s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '8px 0'
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        background: 'rgba(10, 10, 15, 0.95)',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        minWidth: '220px',
+                        marginTop: '8px',
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                        zIndex: 100,
+                        padding: '4px 0'
                       }}
                       onMouseEnter={() => {
-                        setOpenDropdown(navItem.label);
+                        setOpenDropdown(navLabel);
                       }}
                       onMouseLeave={() => {
                         setOpenDropdown(null);
                       }}
                     >
-                      <span
-                        style={{
-                          color: openDropdown === navItem.label ? 'white' : '#d1d5db'
-                        }}
-                      >
-                        {navItem.label}
-                      </span>
-                      {navItem.isDropdown && children.length > 0 && (
-                        <span style={{ fontSize: '10px' }}>▼</span>
-                      )}
+                      {children.map((child, cIdx) => {
+                        const childAttrs = child.attributes || child;
+                        return (
+                          <a
+                            key={cIdx}
+                            href={childAttrs.url || '#'}
+                            style={{
+                              display: 'block',
+                              padding: '12px 20px',
+                              color: '#d1d5db',
+                              textDecoration: 'none',
+                              fontSize: '14px',
+                              transition: 'all 0.3s',
+                              borderRadius:
+                                cIdx === 0
+                                  ? '8px 8px 0 0'
+                                  : cIdx === children.length - 1
+                                  ? '0 0 8px 8px'
+                                  : '0'
+                            }}
+                            onMouseEnter={e => {
+                              (e.currentTarget as HTMLElement).style.background = 'rgba(0,212,255,0.1)';
+                              (e.currentTarget as HTMLElement).style.color = '#00d4ff';
+                            }}
+                            onMouseLeave={e => {
+                              (e.currentTarget as HTMLElement).style.background = 'transparent';
+                              (e.currentTarget as HTMLElement).style.color = '#d1d5db';
+                            }}
+                          >
+                            {childAttrs.label}
+                          </a>
+                        );
+                      })}
                     </div>
-
-                    {/* Dropdown Menu - Only show if has children */}
-                    {navItem.isDropdown && children.length > 0 && openDropdown === navItem.label && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: '100%',
-                          left: 0,
-                          background: 'rgba(10, 10, 15, 0.95)',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          minWidth: '220px',
-                          marginTop: '8px',
-                          backdropFilter: 'blur(10px)',
-                          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                          zIndex: 100,
-                          padding: '4px 0'
-                        }}
-                        onMouseEnter={() => {
-                          setOpenDropdown(navItem.label);
-                        }}
-                        onMouseLeave={() => {
-                          setOpenDropdown(null);
-                        }}
-                      >
-                        {children.map((child, cIdx) => {
-                          const childAttrs = child.attributes || child;
-                          return (
-                            <a
-                              key={cIdx}
-                              href={childAttrs.url || '#'}
-                              style={{
-                                display: 'block',
-                                padding: '12px 20px',
-                                color: '#d1d5db',
-                                textDecoration: 'none',
-                                fontSize: '14px',
-                                transition: 'all 0.3s',
-                                borderRadius:
-                                  cIdx === 0
-                                    ? '8px 8px 0 0'
-                                    : cIdx === children.length - 1
-                                    ? '0 0 8px 8px'
-                                    : '0'
-                              }}
-                              onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.background = 'rgba(0,212,255,0.1)';
-                                (e.currentTarget as HTMLElement).style.color = '#00d4ff';
-                              }}
-                              onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.background = 'transparent';
-                                (e.currentTarget as HTMLElement).style.color = '#d1d5db';
-                              }}
-                            >
-                              {childAttrs.label}
-                            </a>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           <button
