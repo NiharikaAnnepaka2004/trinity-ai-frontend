@@ -2586,7 +2586,7 @@ export default function TrinityAIHomepage() {
                       {navItem.isDropdown && <span style={{ fontSize: '10px' }}>▼</span>}
                     </div>
 
-                    {/* Dropdown Menu */}
+                    {/* Dropdown Menu - Only show if has children */}
                     {navItem.isDropdown && children.length > 0 && (
                       <div
                         style={{
@@ -2616,7 +2616,7 @@ export default function TrinityAIHomepage() {
                         }}
                       >
                         {children.map((child, cIdx) => (
-                          <Link
+                          <a
                             key={cIdx}
                             href={child.url || '#'}
                             style={{
@@ -2643,7 +2643,7 @@ export default function TrinityAIHomepage() {
                             }}
                           >
                             {child.label}
-                          </Link>
+                          </a>
                         ))}
                       </div>
                     )}
