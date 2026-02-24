@@ -2179,7 +2179,6 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -2565,13 +2564,13 @@ export default function TrinityAIHomepage() {
                     <div
                       style={{
                         position: 'absolute',
-                        top: '100%',
+                        top: 'calc(100% - 5px)',
                         left: 0,
                         background: 'rgba(10, 10, 15, 0.95)',
                         borderRadius: '8px',
                         border: '1px solid rgba(255,255,255,0.1)',
                         minWidth: '220px',
-                        marginTop: '8px',
+                        paddingTop: '13px',
                         backdropFilter: 'blur(10px)',
                         boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
                         zIndex: 100,
