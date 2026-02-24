@@ -2182,16 +2182,14 @@
 
 
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://trinity-ai-backend.onrender.com';
 
-// Helper function to build complete image URL - Fixed for actual Strapi response
+// Helper function to build complete image URL
 const getImageUrl = (imageData: any): string | null => {
   if (!imageData) return null;
   
@@ -2201,12 +2199,10 @@ const getImageUrl = (imageData: any): string | null => {
   if (Array.isArray(imageData)) {
     if (imageData.length === 0) return null;
     const img = imageData[0];
-    // Strapi returns url directly in array items
     urlPath = img?.url;
   }
   // Handle direct object format
   else if (typeof imageData === 'object') {
-    // Strapi returns url directly
     urlPath = imageData.url;
   }
   
@@ -2214,35 +2210,8 @@ const getImageUrl = (imageData: any): string | null => {
     return null;
   }
   
-  // Build full URL - always prepend STRAPI_URL for relative paths
+  // Build full URL
   return urlPath.startsWith('http') ? urlPath : `${STRAPI_URL}${urlPath}`;
-};
-
-// Simple fallback - don't generate placeholder, just use CSS gradient
-const getPlaceholderUrl = (): string | null => {
-  return null; // Return null to use CSS gradient fallback
-};
-
-// Helper to build Navigation with dropdowns from Strapi data
-const buildNavWithDropdowns = (mainNav: any[], allNavItems: any[]) => {
-  return mainNav.map((item) => {
-    const navObj: any = {
-      label: item.label,
-      url: item.url,
-      children: []
-    };
-
-    // If this nav has dropdown, find matching children from navigation-items
-    if (item.isDropdown) {
-      const children = allNavItems.filter((child) => child.parentMenu === item.label);
-      navObj.children = children.map((child) => ({
-        label: child.label,
-        url: child.url
-      }));
-    }
-
-    return navObj;
-  });
 };
 
 const isValidEmail = (email: string): boolean => {
@@ -2318,6 +2287,7 @@ export default function TrinityAIHomepage() {
   const [navigationItems, setNavigationItems] = useState<any[]>([]);
   const [navSubItems, setNavSubItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   // Fetch all data from Strapi
   useEffect(() => {
@@ -2553,7 +2523,10 @@ export default function TrinityAIHomepage() {
           <div style={{ display: 'flex', gap: '32px', position: 'relative' }}>
             {navigationItems.length > 0 &&
               navigationItems.map((navItem, idx) => {
-                const children = navSubItems.filter((item) => item.parentMenu === navItem.label);
+                const children = navSubItems.filter((item) => {
+                  const attrs = item.attributes || item;
+                  return attrs.parentMenu === navItem.label;
+                });
 
                 return (
                   <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
@@ -2570,24 +2543,27 @@ export default function TrinityAIHomepage() {
                         gap: '6px',
                         padding: '8px 0'
                       }}
-                      onMouseEnter={e => {
-                        (e.currentTarget as HTMLElement).style.color = 'white';
-                        const dropdown = (e.currentTarget as HTMLElement).nextElementSibling as HTMLElement;
-                        if (dropdown) {
-                          dropdown.style.display = 'block';
-                          dropdown.style.opacity = '1';
-                        }
+                      onMouseEnter={() => {
+                        setOpenDropdown(navItem.label);
                       }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLElement).style.color = '#d1d5db';
+                      onMouseLeave={() => {
+                        setOpenDropdown(null);
                       }}
                     >
-                      {navItem.label}
-                      {navItem.isDropdown && <span style={{ fontSize: '10px' }}>▼</span>}
+                      <span
+                        style={{
+                          color: openDropdown === navItem.label ? 'white' : '#d1d5db'
+                        }}
+                      >
+                        {navItem.label}
+                      </span>
+                      {navItem.isDropdown && children.length > 0 && (
+                        <span style={{ fontSize: '10px' }}>▼</span>
+                      )}
                     </div>
 
                     {/* Dropdown Menu - Only show if has children */}
-                    {navItem.isDropdown && children.length > 0 && (
+                    {navItem.isDropdown && children.length > 0 && openDropdown === navItem.label && (
                       <div
                         style={{
                           position: 'absolute',
@@ -2600,51 +2576,49 @@ export default function TrinityAIHomepage() {
                           marginTop: '8px',
                           backdropFilter: 'blur(10px)',
                           boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                          display: 'none',
-                          opacity: 0,
-                          transition: 'opacity 0.3s ease',
                           zIndex: 100,
                           padding: '4px 0'
                         }}
-                        onMouseEnter={e => {
-                          (e.currentTarget as HTMLElement).style.display = 'block';
-                          (e.currentTarget as HTMLElement).style.opacity = '1';
+                        onMouseEnter={() => {
+                          setOpenDropdown(navItem.label);
                         }}
-                        onMouseLeave={e => {
-                          (e.currentTarget as HTMLElement).style.display = 'none';
-                          (e.currentTarget as HTMLElement).style.opacity = '0';
+                        onMouseLeave={() => {
+                          setOpenDropdown(null);
                         }}
                       >
-                        {children.map((child, cIdx) => (
-                          <a
-                            key={cIdx}
-                            href={child.url || '#'}
-                            style={{
-                              display: 'block',
-                              padding: '12px 20px',
-                              color: '#d1d5db',
-                              textDecoration: 'none',
-                              fontSize: '14px',
-                              transition: 'all 0.3s',
-                              borderRadius:
-                                cIdx === 0
-                                  ? '8px 8px 0 0'
-                                  : cIdx === children.length - 1
-                                  ? '0 0 8px 8px'
-                                  : '0'
-                            }}
-                            onMouseEnter={e => {
-                              (e.currentTarget as HTMLElement).style.background = 'rgba(0,212,255,0.1)';
-                              (e.currentTarget as HTMLElement).style.color = '#00d4ff';
-                            }}
-                            onMouseLeave={e => {
-                              (e.currentTarget as HTMLElement).style.background = 'transparent';
-                              (e.currentTarget as HTMLElement).style.color = '#d1d5db';
-                            }}
-                          >
-                            {child.label}
-                          </a>
-                        ))}
+                        {children.map((child, cIdx) => {
+                          const childAttrs = child.attributes || child;
+                          return (
+                            <a
+                              key={cIdx}
+                              href={childAttrs.url || '#'}
+                              style={{
+                                display: 'block',
+                                padding: '12px 20px',
+                                color: '#d1d5db',
+                                textDecoration: 'none',
+                                fontSize: '14px',
+                                transition: 'all 0.3s',
+                                borderRadius:
+                                  cIdx === 0
+                                    ? '8px 8px 0 0'
+                                    : cIdx === children.length - 1
+                                    ? '0 0 8px 8px'
+                                    : '0'
+                              }}
+                              onMouseEnter={e => {
+                                (e.currentTarget as HTMLElement).style.background = 'rgba(0,212,255,0.1)';
+                                (e.currentTarget as HTMLElement).style.color = '#00d4ff';
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLElement).style.background = 'transparent';
+                                (e.currentTarget as HTMLElement).style.color = '#d1d5db';
+                              }}
+                            >
+                              {childAttrs.label}
+                            </a>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
